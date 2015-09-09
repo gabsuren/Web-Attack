@@ -117,5 +117,6 @@ ClientWindow::~ClientWindow(){
     delete loginsLineEdit;
     delete passwordsLineEdit;
     delete connectionSocket;
+
     qDebug()<<"ClientWindow destructor \n";
 }
