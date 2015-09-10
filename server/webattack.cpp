@@ -292,6 +292,7 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 	}
 
 	cout<<__LINE__<<endl;
+
 	//Brute force for all combinations of the given logins and passwords
 	for (list<string>::iterator loginIt = logins.begin(); loginIt != logins.end(); ++loginIt){
 		cout<<__LINE__<<endl;
@@ -321,7 +322,6 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 			}
 			cout<<__LINE__<<endl;
 
-			//cout<<"respBuffer"<<respBuffer<<endl;
 			if (strstr(respBuffer.c_str(), (*loginIt).c_str()) != NULL){
 				cout<<"Congradulation you have logged in\n";
 				cout<<"Login ="<<*loginIt<<" Password ="<<*passwordIt<<endl;

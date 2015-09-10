@@ -17,6 +17,7 @@ class ClientWindow : public QDialog
 private slots:
     void loginsFileDialog();
     void passwordsFileDialog();
+    void readData();
     void startAttack();
     void cancelAttack();
 
@@ -38,7 +39,7 @@ private:
     QString loginsFileName;
     QString passwordsFileName;
     QString hostName;
-    QTcpSocket *connectionSocket;
+    QTcpSocket *tcpSocket;
     quint16 port;
 };
 

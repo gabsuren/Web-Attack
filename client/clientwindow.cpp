@@ -3,7 +3,7 @@
 #include "clientwindow.h"
 
 ClientWindow::ClientWindow(QDialog *parent, QString hostname, QTcpSocket *socket) :
-    QDialog(parent), hostName(hostname), connectionSocket(socket) {
+    QDialog(parent), hostName(hostname), tcpSocket(socket) {
 
     loginsFileButton = new QPushButton(tr("logins file"));
     passwordsFileButton = new QPushButton(tr("passwords file"));
@@ -21,7 +21,8 @@ ClientWindow::ClientWindow(QDialog *parent, QString hostname, QTcpSocket *socket
     connect(loginsFileButton, SIGNAL(clicked()), this, SLOT(loginsFileDialog()));
     connect(passwordsFileButton, SIGNAL(clicked()), this, SLOT(passwordsFileDialog()));
     connect(startAttackButton, SIGNAL(clicked()), this, SLOT(startAttack()));
-    connect(startAttackButton, SIGNAL(clicked()), this, SLOT(cancelAttack()));
+    connect(cancellAttackButton, SIGNAL(clicked()), this, SLOT(cancelAttack()));
+    connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readData()));
 
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(hostLabel, 0, 0);
@@ -36,8 +37,8 @@ ClientWindow::ClientWindow(QDialog *parent, QString hostname, QTcpSocket *socket
     setWindowTitle("Connected to " + hostName);
 }
 
-ClientWindow::ClientWindow() : connectionSocket(NULL) {
-    ClientWindow(NULL, "", connectionSocket);
+ClientWindow::ClientWindow() : tcpSocket(NULL) {
+    ClientWindow(NULL, "", tcpSocket);
 }
 
 void ClientWindow::loginsFileDialog(){
@@ -87,22 +88,35 @@ void ClientWindow::startAttack(){
         return;
     }
 
-    connectionSocket->write("<HOST>");
-    connectionSocket->write(hostLineEdit->text().toStdString().c_str());
-    connectionSocket->write("</HOST>");
-    connectionSocket->write("<LOGINS>");
-    connectionSocket->write(loginsFile.readAll());
-    connectionSocket->write("</LOGINS>");
-    connectionSocket->write("<PASSWORDS>");
-    connectionSocket->write(passwordsFile.readAll());
-    connectionSocket->write("</PASSWORDS>");
-
-    connectionSocket->flush();
+    tcpSocket->write("<HOST>");
+    tcpSocket->write(hostLineEdit->text().toStdString().c_str());
+    tcpSocket->write("</HOST>");
+    tcpSocket->write("<LOGINS>");
+    tcpSocket->write(loginsFile.readAll());
+    tcpSocket->waitForBytesWritten();
+    tcpSocket->write("</LOGINS>");
+    tcpSocket->write("<PASSWORDS>");
+    tcpSocket->write(passwordsFile.readAll());
+    tcpSocket->waitForBytesWritten();
+    tcpSocket->write("</PASSWORDS>");
+    tcpSocket->flush();
     loginsFile.close();
     passwordsFile.close();
 }
 
 void ClientWindow::cancelAttack(){
+
+}
+
+void ClientWindow::readData(){
+    QDataStream in(tcpSocket);
+    in.setVersion(QDataStream::Qt_4_0);
+    QString buffer;
+    while (tcpSocket->bytesAvailable()){
+       buffer.append(tcpSocket->readAll());
+    }
+
+    qDebug()<<buffer<<endl;
 
 }
 
@@ -116,6 +130,6 @@ ClientWindow::~ClientWindow(){
     delete hostLineEdit;
     delete loginsLineEdit;
     delete passwordsLineEdit;
-    delete connectionSocket;
+    //delete tcpSocket;
     qDebug()<<"ClientWindow destructor \n";
 }
