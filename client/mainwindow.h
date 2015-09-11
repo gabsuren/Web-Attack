@@ -36,7 +36,6 @@ private:
     QPushButton *serverConnectionButton;
     QPushButton *quitButton;
     QDialogButtonBox *buttonBox;
-
     QString hostName;
     quint16 port;
 };

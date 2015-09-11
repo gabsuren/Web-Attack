@@ -291,11 +291,8 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 		return false;
 	}
 
-	cout<<__LINE__<<endl;
-
 	//Brute force for all combinations of the given logins and passwords
 	for (list<string>::iterator loginIt = logins.begin(); loginIt != logins.end(); ++loginIt){
-		cout<<__LINE__<<endl;
 		for (list<string>::iterator passwordIt = passwords.begin(); passwordIt != passwords.end(); ++passwordIt){
 
 			if(!strcasecmp((char*)form.formMethod, "post")){
@@ -306,7 +303,6 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 				curl_easy_setopt(curl, CURLOPT_POST, 1);
 				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data->c_str());
 			} else if(!strcasecmp((char*)form.formMethod, "get")){
-				cout<<__LINE__<<endl;
 				data = concat(action, form.login, *loginIt, form.password, *passwordIt);
 				cout<<*data<<endl;
 				curl_easy_setopt(curl, CURLOPT_URL,  data->c_str());

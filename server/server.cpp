@@ -105,7 +105,7 @@ int main(int argc, char *argv[]){
 	    	string password;
 	        startAttack(hostName, logins, passwords, login, password);
 	        if(!login.empty() && !password.empty()){
-		    string sendData = "found login " + login + "found password " + password + "\n";
+		    string sendData = "found login " + login + ", found password " + password;
 	            write(newsockfd, sendData.c_str(), sendData.length());
 	        } else{
 	            write(newsockfd, "There was no corresponding login and password", 45);
@@ -113,6 +113,8 @@ int main(int argc, char *argv[]){
 		isHostFound = false;
 		isLoginsFound = false;
 		isPasswordsFound = false;
+		logins.clear();
+		passwords.clear();
 	    }
     }
     close(newsockfd);
@@ -127,6 +129,6 @@ void dostuff (int sock, string* fillIncommingData){
 	n = read(sock, buffer, 255);
 	if (n < 0) error("ERROR reading from socket");
 	fillIncommingData->append(buffer);
-	n = write(sock,"I got your message",18);
-	if (n < 0) error("ERROR writing to socket");
+	//n = write(sock,"I got your message",18);
+	//if (n < 0) error("ERROR writing to socket");
 }

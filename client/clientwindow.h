@@ -9,6 +9,7 @@ class QString;
 class QLabel;
 class QDialogButtonBox;
 class QTcpSocket;
+class QTextEdit;
 
 class ClientWindow : public QDialog
 {
@@ -27,19 +28,20 @@ public:
     ~ClientWindow();
     
 private:
-    QPushButton *loginsFileButton;
-    QPushButton *passwordsFileButton;
-    QPushButton *startAttackButton;
-    QPushButton *cancellAttackButton;
     QDialogButtonBox *buttonBox;
-    QLabel *hostLabel;
-    QLineEdit *hostLineEdit;
-    QLineEdit *loginsLineEdit;
+    QPushButton *passwordsFileButton;
+    QPushButton *cancellAttackButton;
+    QPushButton *startAttackButton;
+    QPushButton *loginsFileButton;
     QLineEdit *passwordsLineEdit;
-    QString loginsFileName;
-    QString passwordsFileName;
-    QString hostName;
+    QLineEdit *loginsLineEdit;
+    QLineEdit *hostLineEdit;
     QTcpSocket *tcpSocket;
+    QTextEdit *textEdit; 
+    QLabel    *hostLabel;
+    QString passwordsFileName;
+    QString loginsFileName;
+    QString hostName;
     quint16 port;
 };
 

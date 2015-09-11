@@ -12,7 +12,7 @@ ClientWindow::ClientWindow(QDialog *parent, QString hostname, QTcpSocket *socket
     loginsLineEdit = new QLineEdit;
     passwordsLineEdit = new QLineEdit;
     hostLineEdit = new QLineEdit;
-    hostLabel = new QLabel("Enter host name which should be attacked");
+    hostLabel = new QLabel("Enter host name which should be attack");
     buttonBox = new QDialogButtonBox;
 
     buttonBox->addButton(startAttackButton, QDialogButtonBox::ActionRole);
@@ -24,6 +24,8 @@ ClientWindow::ClientWindow(QDialog *parent, QString hostname, QTcpSocket *socket
     connect(cancellAttackButton, SIGNAL(clicked()), this, SLOT(cancelAttack()));
     connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readData()));
 
+    //textEdit = new QTextEdit("Connection is successful \n");
+    textEdit = new QTextEdit("");
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(hostLabel, 0, 0);
     mainLayout->addWidget(hostLineEdit, 0, 1);
@@ -31,7 +33,8 @@ ClientWindow::ClientWindow(QDialog *parent, QString hostname, QTcpSocket *socket
     mainLayout->addWidget(loginsLineEdit, 1, 1);
     mainLayout->addWidget(passwordsFileButton, 2, 0);
     mainLayout->addWidget(passwordsLineEdit, 2, 1);
-    mainLayout->addWidget(buttonBox, 3, 0, 1, 2);
+    mainLayout->addWidget(textEdit, 3, 0, 1, 2);
+    mainLayout->addWidget(buttonBox, 4, 0, 1, 2);
     setLayout(mainLayout);
 
     setWindowTitle("Connected to " + hostName);
@@ -75,7 +78,7 @@ void ClientWindow::startAttack(){
         qWarning()<<"Please Enter passwords file";
         return;
     }
-
+    qDebug()<<"loginsFileName"<<loginsFileName<<endl;
     QFile loginsFile(loginsFileName);
     if(!loginsFile.open(QIODevice::ReadOnly)){
         qWarning() << "Error logins file can't be opened ! !";
@@ -99,7 +102,7 @@ void ClientWindow::startAttack(){
     tcpSocket->write(passwordsFile.readAll());
     tcpSocket->waitForBytesWritten();
     tcpSocket->write("</PASSWORDS>");
-    tcpSocket->flush();
+    //tcpSocket->flush();
     loginsFile.close();
     passwordsFile.close();
 }
@@ -112,8 +115,23 @@ void ClientWindow::readData(){
     QDataStream in(tcpSocket);
     in.setVersion(QDataStream::Qt_4_0);
     QString buffer;
+    int blockSize = 0;
+    in.setVersion(QDataStream::Qt_4_0);
+
+//    if (blockSize == 0) {
+//       if (tcpSocket->bytesAvailable() < (int)sizeof(quint16))
+//            return;
+//        in >> blockSize;
+//    }
+
+    //if (tcpSocket->bytesAvailable() < blockSize)
+    //    return;
+
     while (tcpSocket->bytesAvailable()){
-       buffer.append(tcpSocket->readAll());
+	textEdit->moveCursor(QTextCursor::Down);
+        buffer.append(tcpSocket->readAll());
+	
+        textEdit->insertPlainText(buffer);
     }
 
     qDebug()<<buffer<<endl;
