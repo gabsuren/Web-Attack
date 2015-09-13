@@ -7,3 +7,7 @@ OVERVIEW
   -----------
   Server - ./webattack port 
   Clent - ./client
+
+USED LIBRARIES
+  -----------
+  libcurl, libxml
