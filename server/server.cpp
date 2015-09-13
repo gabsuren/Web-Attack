@@ -15,7 +15,7 @@ void error(const char *msg){
 }
 
 int main(int argc, char *argv[]){
-	int sockfd, newsockfd, portno, pid;
+    int sockfd, newsockfd, portno, pid;
     socklen_t clilen;
     struct sockaddr_in serv_addr={0}, cli_addr;
 
@@ -50,12 +50,12 @@ int main(int argc, char *argv[]){
     const string passwordsStartTag="<PASSWORDS>";
     const string passwordsEndTag="</PASSWORDS>";
     bool isHostFound = false;
-	bool isLoginsFound = false;
-	bool isPasswordsFound = false;
+    bool isLoginsFound = false;
+    bool isPasswordsFound = false;
     string *fillIncommingData = new string;
     list<string> logins;
-	list<string> passwords;
-	string hostName;
+    list<string> passwords;
+    string hostName;
     string delimiter = "\n";
     while(1){
 
