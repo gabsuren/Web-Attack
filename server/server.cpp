@@ -1,8 +1,8 @@
-#include <unistd.h>
-#include <stdlib.h>
 #include <string>
 #include <list>
 #include <iostream>
+#include <unistd.h>
+#include <stdlib.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -49,16 +49,16 @@ int main(int argc, char *argv[]){
     const string loginsEndTag="</LOGINS>";
     const string passwordsStartTag="<PASSWORDS>";
     const string passwordsEndTag="</PASSWORDS>";
-    list<string> logins;
-    list<string> passwords;
-    string hostName;
-    string *fillIncommingData = new string;
-
     bool isHostFound = false;
-    bool isLoginsFound = false;
-    bool isPasswordsFound = false;
+	bool isLoginsFound = false;
+	bool isPasswordsFound = false;
+    string *fillIncommingData = new string;
+    list<string> logins;
+	list<string> passwords;
+	string hostName;
     string delimiter = "\n";
     while(1){
+
 	    dostuff(newsockfd, fillIncommingData);
 	    if(!isHostFound){
 		    if(size_t hostStart = fillIncommingData->find(hostStartTag) != std::string::npos && !isHostFound){
@@ -113,12 +113,14 @@ int main(int argc, char *argv[]){
 		isHostFound = false;
 		isLoginsFound = false;
 		isPasswordsFound = false;
+		fillIncommingData->clear();
 		logins.clear();
 		passwords.clear();
 	    }
     }
     close(newsockfd);
     close(sockfd);
+    delete fillIncommingData;
     return 0; 
 }
 
