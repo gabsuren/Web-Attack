@@ -21,11 +21,12 @@ int main(int argc, char *argv[]){
 
     if (argc < 2) {
         cerr<<"ERROR, no port provided\n";
-        exit(1);
+		return EXIT_FAILURE; 
     }
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0){
         cerr<<"ERROR opening socket";
+		return EXIT_FAILURE; 
     }
 
     portno = atoi(argv[1]);
@@ -34,6 +35,7 @@ int main(int argc, char *argv[]){
     serv_addr.sin_port = htons(portno);
     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0){
         error("ERROR on binding");
+		return EXIT_FAILURE; 
     }
     listen(sockfd,5);
     clilen = sizeof(cli_addr);
@@ -41,6 +43,7 @@ int main(int argc, char *argv[]){
     newsockfd = accept(sockfd,  (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0){
         error("ERROR on accept");
+		return EXIT_FAILURE; 
     }
 
     const string hostStartTag="<HOST>";
