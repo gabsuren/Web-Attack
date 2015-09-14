@@ -13,15 +13,15 @@ using namespace std;
 
 struct Context{
 	Context(): containsForm(false) { }
-	char* formMethod = NULL;
-	char* login = NULL;
-	char* password = NULL;
-	char* action = NULL;
+	char *formMethod = NULL;
+	char *login = NULL;
+	char *password = NULL;
+	char *action = NULL;
 	bool containsForm;
 } form;
 
 
-static const char* possibleLoginFields[] = {"login", "your_email", "username"}; // Possible login fields names
+static const char *possibleLoginFields[] = {"login", "your_email", "username"}; // Possible login fields names
 
 //
 //  libcurl write callback function
@@ -243,7 +243,7 @@ static void parseHtml(const std::string &html){
 }
 
 string* concat(char* action, const char *login, string loginValue, const char *password, string passwordValue){
-	string* result = new string;
+	string *result = new string;
 
 	if(action){
 		result->append(action);
@@ -262,8 +262,8 @@ string* concat(char* action, const char *login, string loginValue, const char *p
 
 static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passwords, Context &form, char *action, string &login, string &password){
 	string *data;
-	CURLcode code;
 	CURL *curl;
+	CURLcode code;
 	string respBuffer;
 	char errBuffer[CURL_ERROR_SIZE];
 	curl_global_init(CURL_GLOBAL_ALL);
