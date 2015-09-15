@@ -5,7 +5,7 @@ DESCRIPTION
   
 OVERVIEW
   -----------
-  Server - ./webattack port 
+  Server - ./webattack portNumber
   Clent - ./client
 
 USED LIBRARIES
