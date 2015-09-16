@@ -52,6 +52,7 @@ int main(int argc, char *argv[]){
     const string loginsEndTag="</LOGINS>";
     const string passwordsStartTag="<PASSWORDS>";
     const string passwordsEndTag="</PASSWORDS>";
+    const string delimiter = "\n";
     bool isHostFound = false;
     bool isLoginsFound = false;
     bool isPasswordsFound = false;
@@ -59,7 +60,6 @@ int main(int argc, char *argv[]){
     list<string> logins;
     list<string> passwords;
     string hostName;
-    string delimiter = "\n";
     while(1){
 
 	    dostuff(newsockfd, fillIncommingData);

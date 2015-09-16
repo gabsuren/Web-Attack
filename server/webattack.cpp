@@ -108,7 +108,7 @@ static bool init(CURL *&conn, char *url, string& responceBuffer, char* errorBuff
   return true;
 }
 
-const xmlChar* findElement(const xmlChar **attributes, const char *element){
+const xmlChar *findElement(const xmlChar **attributes, const char *element){
 	for(int i = 0; *(attributes + i) != NULL; i++){
 		if(!strcasecmp((char*)(*(attributes + i)), element)){
 			return *(attributes + i + 1);
@@ -117,7 +117,7 @@ const xmlChar* findElement(const xmlChar **attributes, const char *element){
 	return NULL;
 }
 
-const xmlChar* findElementNameByType(const xmlChar **attributes, const char *elementType){
+const xmlChar *findElementNameByType(const xmlChar **attributes, const char *elementType){
 	for(int i = 0; *(attributes + i) != NULL; i++){
 		if(!strcasecmp((char*)(*(attributes + i)), "type") && !strcasecmp((char*)(*(attributes + i + 1)), elementType)){
 			for(int j = 0; *(attributes + j) != NULL; j++){
@@ -130,7 +130,7 @@ const xmlChar* findElementNameByType(const xmlChar **attributes, const char *ele
 	return NULL;
 }
 
-const xmlChar* findElementValueByType(const xmlChar **attributes, const char *elementType){
+const xmlChar *findElementValueByType(const xmlChar **attributes, const char *elementType){
 	for(int i = 0; *(attributes + i) != NULL; i++){
 		if(!strcasecmp((char*)(*(attributes + i)), elementType)){
 			return *(attributes + i + 1);
