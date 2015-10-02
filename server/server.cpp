@@ -10,22 +10,22 @@
 using namespace std;
 
 void dostuff(int, string*); 
-void error(const char *msg){
+void error(const char *msg) {
     exit(1);
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
     int sockfd, newsockfd, portno, pid;
     socklen_t clilen;
-    struct sockaddr_in serv_addr={0}, cli_addr;
+    struct sockaddr_in serv_addr = {0}, cli_addr;
 
     if (argc < 2) {
-        cerr<<"ERROR, no port provided\n";
+        cerr <<"ERROR, no port provided\n";
 		return EXIT_FAILURE; 
     }
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0){
-        cerr<<"ERROR opening socket";
+    if (sockfd < 0) {
+        cerr <<"ERROR opening socket";
 		return EXIT_FAILURE; 
     }
 
@@ -33,25 +33,25 @@ int main(int argc, char *argv[]){
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(portno);
-    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0){
+    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
         error("ERROR on binding");
 		return EXIT_FAILURE; 
     }
-    listen(sockfd,5);
+    listen(sockfd, 5);
     clilen = sizeof(cli_addr);
 
     newsockfd = accept(sockfd,  (struct sockaddr *) &cli_addr, &clilen);
-    if (newsockfd < 0){
+    if (newsockfd < 0) {
         error("ERROR on accept");
 		return EXIT_FAILURE; 
     }
 
-    const string hostStartTag="<HOST>";
-    const string hostEndTag="</HOST>";
-    const string loginsStartTag="<LOGINS>";
-    const string loginsEndTag="</LOGINS>";
-    const string passwordsStartTag="<PASSWORDS>";
-    const string passwordsEndTag="</PASSWORDS>";
+    const string hostStartTag = "<HOST>";
+    const string hostEndTag = "</HOST>";
+    const string loginsStartTag = "<LOGINS>";
+    const string loginsEndTag = "</LOGINS>";
+    const string passwordsStartTag = "<PASSWORDS>";
+    const string passwordsEndTag = "</PASSWORDS>";
     const string delimiter = "\n";
     bool hostFound = false;
     bool loginsFound = false;
@@ -60,25 +60,25 @@ int main(int argc, char *argv[]){
     list<string> logins;
     list<string> passwords;
     string hostName;
-    while(1){
+    while (1) {
 	    dostuff(newsockfd, fillIncommingData);
-	    if(!hostFound){
-		    if(size_t hostStart = fillIncommingData->find(hostStartTag) != std::string::npos && !hostFound){
+	    if (!hostFound) {
+		    if (size_t hostStart = fillIncommingData->find(hostStartTag) != std::string::npos && !hostFound) {
 			    size_t hostEnd = fillIncommingData->find(hostEndTag);
 			    hostName = fillIncommingData->substr(hostStart + hostStartTag.length() - 1, hostEnd - hostStart - hostStartTag.length() + 1);
-			    cout<<"found host = "<<hostName<<"\n";
+			    cout <<"found host = " <<hostName <<"\n";
 			    hostFound = true;
 		    }
 	    }
 
-	    if(!loginsFound){
+	    if (!loginsFound) {
 		    size_t loginsStartPos = fillIncommingData->find(loginsStartTag);
 
-		    if(loginsStartPos != string::npos){
+		    if (loginsStartPos != string::npos) {
 			    size_t loginstEndPos = fillIncommingData->find(loginsEndTag);
-			    int start=loginsStartPos+loginsStartTag.length();
+			    int start = loginsStartPos+loginsStartTag.length();
 			    int end = fillIncommingData->find(delimiter, start);
-			    while (end < loginstEndPos){
+			    while (end < loginstEndPos) {
 				    logins.push_back(fillIncommingData->substr(start, end - start));
 				    start = end + delimiter.length();
 				    end = fillIncommingData->find(delimiter, start);
@@ -86,14 +86,14 @@ int main(int argc, char *argv[]){
 			    loginsFound = true;
 		    }
 	    }
-	    if(!passwordsFound){
+	    if (!passwordsFound) {
 		    size_t passwordsStartPos = fillIncommingData->find(passwordsStartTag);
 
-		    if(passwordsStartPos != string::npos){
+		    if (passwordsStartPos != string::npos) {
 			    size_t passwordsEndPos = fillIncommingData->find(passwordsEndPos);
-			    int start=passwordsStartPos+passwordsStartTag.length();
+			    int start = passwordsStartPos+passwordsStartTag.length();
 			    int end = fillIncommingData->find(delimiter, start);
-			    while (end < passwordsEndPos){
+			    while (end < passwordsEndPos) {
 				    passwords.push_back(fillIncommingData->substr(start, end - start));
 				    start = end + delimiter.length();
 				    end = fillIncommingData->find(delimiter, start);
@@ -101,14 +101,14 @@ int main(int argc, char *argv[]){
 			    passwordsFound = true;
 		    }
 	    }
-	    if(hostFound && loginsFound && passwordsFound){
+	    if (hostFound && loginsFound && passwordsFound) {
 	    	string login;
 	    	string password;
 	        startAttack(hostName, logins, passwords, login, password);
-	        if(!login.empty() && !password.empty()){
+	        if (!login.empty() && !password.empty()) {
 		    string sendData = "found login " + login + ", found password " + password;
 	            write(newsockfd, sendData.c_str(), sendData.length());
-	        } else{
+	        } else {
 	            write(newsockfd, "There was no corresponding login and password", 45);
 	        }
 		hostFound = false;
@@ -126,12 +126,12 @@ int main(int argc, char *argv[]){
 }
 
 
-void dostuff (int sock, string* fillIncommingData){
+void dostuff (int sock, string* fillIncommingData) {
 	int n;
 	char buffer[256]={0};
 	n = read(sock, buffer, 255);
 	if (n < 0) error("ERROR reading from socket");
 	fillIncommingData->append(buffer);
-	//n = write(sock,"I got your message",18);
-	//if (n < 0) error("ERROR writing to socket");
+	// n = write(sock,"I got your message",18);
+	// if (n < 0) error("ERROR writing to socket");
 }
