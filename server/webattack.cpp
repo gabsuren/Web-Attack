@@ -10,7 +10,6 @@ using namespace std;
 //
 //  libxml callback context structure
 //
-
 struct Context {
 	Context(): containsForm(false) { }
 	char *formMethod = NULL;
@@ -27,7 +26,6 @@ static const char *possibleLoginFields[] = {"login", "your_email", "username"};
 //
 //  libcurl write callback function
 //
-
 static int writer(char *data, size_t size, size_t nmemb,
                   std::string *writerData) {
   if (writerData == NULL)
@@ -41,7 +39,6 @@ static int writer(char *data, size_t size, size_t nmemb,
 //
 //  libcurl connection initialization
 //
-
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp) {
 	struct WriteThis *pooh = (struct WriteThis *)userp;
 	if(size*nmemb < 1) {
@@ -193,7 +190,6 @@ static htmlSAXHandler saxHandler = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NU
 //
 //  Parse given (assumed to be) HTML text and btutforce atack on the page
 //
-
 static void parseHtml(const std::string &html) {
 	htmlParserCtxtPtr ctxt;
 	Context context;
