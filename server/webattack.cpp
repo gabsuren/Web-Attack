@@ -151,15 +151,15 @@ static void StartElement(void *voidContext, const xmlChar *name, const xmlChar *
 			form.containsForm = true;
 			form.formMethod = (char*)malloc((strlen((char*)tempFormMethod))*sizeof(xmlChar*));
 			strcpy(form.formMethod, (char*)tempFormMethod);
-			printf("=== Found method tag  = %s \n", form.formMethod);
+			printf("Found method tag  = %s \n", form.formMethod);
 			const xmlChar* tempAction = findElementValueByType(attributes, "action");
 			if(tempAction){
 				form.action = (char*)malloc((strlen((char*)tempAction))*sizeof(xmlChar*));
 				strcpy(form.action, (char*)tempAction);
-				printf("=== Found action tag inside form  = %s \n", form.action);
+				printf("Found action tag inside form  = %s \n", form.action);
 			}
 		} else {
-			printf("=== Method did not founded \n");
+			printf("Method was not found \n");
 		}
 	}
 	if(form.containsForm  && !strcasecmp((char *)name, "input")) {
@@ -168,7 +168,7 @@ static void StartElement(void *voidContext, const xmlChar *name, const xmlChar *
 			if(tempFormPassword){
 				form.password = (char*)malloc((strlen((char*)tempFormPassword))*sizeof(xmlChar*));
 				strcpy(form.password, (char*)tempFormPassword);
-				printf("=== Found password  = %s \n", form.password);
+				printf("Found password  = %s \n", form.password);
 			}
 		}
 		if(!form.login){
@@ -231,7 +231,7 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl = curl_easy_init();
 	if(!curl){
-		cerr<<"curl initialization error \n";
+		cerr<<"Curl initialization error \n";
 		return false;
 	}
 
@@ -270,7 +270,6 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 				curl_easy_strerror(code));
 				break;
 			}
-			cout<<__LINE__<<endl;
 			if (strstr(respBuffer.c_str(), (*loginIt).c_str()) != NULL){
 				cout<<"Congradulation you have logged in\n";
 				cout<<"Login ="<<*loginIt<<" Password ="<<*passwordIt<<endl;
