@@ -4,7 +4,6 @@
 
 ClientWindow::ClientWindow(QDialog *parent, QString hostname, QTcpSocket *socket) :
     QDialog(parent), hostName(hostname), tcpSocket(socket) {
-
     loginsFileButton = new QPushButton(tr("logins file"));
     passwordsFileButton = new QPushButton(tr("passwords file"));
     startAttackButton = new QPushButton(tr("START"));
@@ -24,7 +23,6 @@ ClientWindow::ClientWindow(QDialog *parent, QString hostname, QTcpSocket *socket
     connect(cancellAttackButton, SIGNAL(clicked()), this, SLOT(cancelAttack()));
     connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readData()));
 
-    //textEdit = new QTextEdit("Connection is successful \n");
     textEdit = new QTextEdit("");
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(hostLabel, 0, 0);
@@ -44,49 +42,48 @@ ClientWindow::ClientWindow() : tcpSocket(NULL) {
     ClientWindow(NULL, "", tcpSocket);
 }
 
-void ClientWindow::loginsFileDialog(){
+void ClientWindow::loginsFileDialog() {
     QStringList fileList = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::currentPath());
-    if(!fileList.empty()){
-        qDebug()<<fileList.at(0);
+    if (!fileList.empty()) {
+        qDebug() <<fileList.at(0);
         loginsFileName = fileList.at(0);
         loginsLineEdit->setText(loginsFileName);
     }
 }
 
-void ClientWindow::passwordsFileDialog(){
+void ClientWindow::passwordsFileDialog() {
     QStringList fileList = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::currentPath());
-    if(!fileList.empty()){
-        qDebug()<<fileList.at(0);
+    if (!fileList.empty()) {
+        qDebug() <<fileList.at(0);
         passwordsFileName = fileList.at(0);
         passwordsLineEdit->setText(passwordsFileName);
     }
 }
 
-void ClientWindow::startAttack(){
-
-    if(hostLineEdit->text().isEmpty()){
-        qWarning()<<"Error: Please Enter host name";
+void ClientWindow::startAttack() {
+    if (hostLineEdit->text().isEmpty()) {
+        qWarning() <<"Error: Please Enter host name";
         return;
     }
 
-    if(loginsFileName.isEmpty()){
-        qWarning()<<"Please Enter logins file";
+    if (loginsFileName.isEmpty()) {
+        qWarning() <<"Please Enter logins file";
         return;
     }
 
-    if(passwordsFileName.isEmpty()){
-        qWarning()<<"Please Enter passwords file";
+    if (passwordsFileName.isEmpty()) {
+        qWarning() <<"Please Enter passwords file";
         return;
     }
-    qDebug()<<"loginsFileName"<<loginsFileName<<endl;
+    qDebug() <<"loginsFileName" <<loginsFileName <<endl;
     QFile loginsFile(loginsFileName);
-    if(!loginsFile.open(QIODevice::ReadOnly)){
+    if (!loginsFile.open(QIODevice::ReadOnly)) {
         qWarning() << "Error logins file can't be opened ! !";
         return;
     }
 
     QFile passwordsFile(passwordsFileName);
-    if(!passwordsFile.open(QIODevice::ReadOnly)){
+    if (!passwordsFile.open(QIODevice::ReadOnly)) {
         qWarning() << "Error passwords file can't be opened ! !";
         return;
     }
@@ -107,15 +104,13 @@ void ClientWindow::startAttack(){
     passwordsFile.close();
 }
 
-void ClientWindow::cancelAttack(){
-
+void ClientWindow::cancelAttack() {
 }
 
-void ClientWindow::readData(){
+void ClientWindow::readData() {
     QDataStream in(tcpSocket);
     in.setVersion(QDataStream::Qt_4_0);
     QString buffer;
-    int blockSize = 0;
     in.setVersion(QDataStream::Qt_4_0);
 
 //    if (blockSize == 0) {
@@ -124,21 +119,17 @@ void ClientWindow::readData(){
 //        in >> blockSize;
 //    }
 
-    //if (tcpSocket->bytesAvailable() < blockSize)
-    //    return;
 
-    while (tcpSocket->bytesAvailable()){
+    while (tcpSocket->bytesAvailable()) {
 	textEdit->moveCursor(QTextCursor::Down);
         buffer.append(tcpSocket->readAll());
-	
         textEdit->insertPlainText(buffer);
     }
 
-    qDebug()<<buffer<<endl;
-
+    qDebug() <<buffer <<endl;
 }
 
-ClientWindow::~ClientWindow(){
+ClientWindow::~ClientWindow() {
     delete loginsFileButton;
     delete passwordsFileButton;
     delete startAttackButton;
@@ -148,6 +139,5 @@ ClientWindow::~ClientWindow(){
     delete hostLineEdit;
     delete loginsLineEdit;
     delete passwordsLineEdit;
-    //delete tcpSocket;
-    qDebug()<<"ClientWindow destructor \n";
+    qDebug() <<"ClientWindow destructor \n";
 }

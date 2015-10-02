@@ -4,8 +4,7 @@
 #include "clientwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QWidget(parent)
-{
+    QWidget(parent) {
     hostLabel = new QLabel(tr("&Server name:"));
     portLabel = new QLabel(tr("S&erver port:"));
 
@@ -63,12 +62,12 @@ MainWindow::MainWindow(QWidget *parent) :
     portLineEdit->setFocus();
 }
 
-void MainWindow::enableGetFortuneButton(){
+void MainWindow::enableGetFortuneButton() {
     bool enable(!hostLineEdit->text().isEmpty() && !portLineEdit->text().isEmpty());
     serverConnectionButton->setEnabled(enable);
 }
 
-void MainWindow::requestServerConnection(){
+void MainWindow::requestServerConnection() {
     const int Timeout = 5 * 1000;
     serverConnectionButton->setEnabled(false);
     hostName = hostLineEdit->text();
@@ -77,20 +76,17 @@ void MainWindow::requestServerConnection(){
     QTcpSocket socket;
     socket.connectToHost(hostName, port);
     if (!socket.waitForConnected(Timeout)) {
-        //emit error(socket.error(), socket.errorString());
-         qDebug()<<"Error on connection \n";
+         qDebug() <<"Error on connection \n";
         return;
-    }else{
-        qDebug()<<"Connection Successful \n";
-        //this->hide();
+    } else {
+        qDebug() <<"Connection Successful \n";
         this->close();
         ClientWindow clientWindow(NULL, hostName, &socket);
         clientWindow.exec();
     }
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete hostLabel;
     delete portLabel;
     delete hostLineEdit;
@@ -99,5 +95,5 @@ MainWindow::~MainWindow()
     delete serverConnectionButton;
     delete quitButton;
     delete buttonBox;
-    qDebug()<<"MainWindow destructor \n";
+    qDebug() <<"MainWindow destructor \n";
 }

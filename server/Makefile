@@ -10,4 +10,7 @@ all: build
 build: $(EXE)
 
 $(EXE): $(SOURCE)
-	@$(CC) $^ -o $@ -I/usr/include/libxml2 -lxml2 -lcurl
+	@$(CC) $^ -o $@  -lxml2 -lcurl
+
+clean:
+	rm -rf $(EXE)
