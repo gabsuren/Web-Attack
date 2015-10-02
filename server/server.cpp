@@ -53,26 +53,25 @@ int main(int argc, char *argv[]){
     const string passwordsStartTag="<PASSWORDS>";
     const string passwordsEndTag="</PASSWORDS>";
     const string delimiter = "\n";
-    bool isHostFound = false;
-    bool isLoginsFound = false;
-    bool isPasswordsFound = false;
+    bool hostFound = false;
+    bool loginsFound = false;
+    bool passwordsFound = false;
     string *fillIncommingData = new string;
     list<string> logins;
     list<string> passwords;
     string hostName;
     while(1){
-
 	    dostuff(newsockfd, fillIncommingData);
-	    if(!isHostFound){
-		    if(size_t hostStart = fillIncommingData->find(hostStartTag) != std::string::npos && !isHostFound){
+	    if(!hostFound){
+		    if(size_t hostStart = fillIncommingData->find(hostStartTag) != std::string::npos && !hostFound){
 			    size_t hostEnd = fillIncommingData->find(hostEndTag);
 			    hostName = fillIncommingData->substr(hostStart + hostStartTag.length() - 1, hostEnd - hostStart - hostStartTag.length() + 1);
 			    cout<<"found host = "<<hostName<<"\n";
-			    isHostFound = true;
+			    hostFound = true;
 		    }
 	    }
 
-	    if(!isLoginsFound){
+	    if(!loginsFound){
 		    size_t loginsStartPos = fillIncommingData->find(loginsStartTag);
 
 		    if(loginsStartPos != string::npos){
@@ -84,11 +83,10 @@ int main(int argc, char *argv[]){
 				    start = end + delimiter.length();
 				    end = fillIncommingData->find(delimiter, start);
 			    }
-			    isLoginsFound = true;
+			    loginsFound = true;
 		    }
 	    }
-
-	    if(!isPasswordsFound){
+	    if(!passwordsFound){
 		    size_t passwordsStartPos = fillIncommingData->find(passwordsStartTag);
 
 		    if(passwordsStartPos != string::npos){
@@ -100,10 +98,10 @@ int main(int argc, char *argv[]){
 				    start = end + delimiter.length();
 				    end = fillIncommingData->find(delimiter, start);
 			    }
-			    isPasswordsFound = true;
+			    passwordsFound = true;
 		    }
 	    }
-	    if(isHostFound && isLoginsFound && isPasswordsFound){
+	    if(hostFound && loginsFound && passwordsFound){
 	    	string login;
 	    	string password;
 	        startAttack(hostName, logins, passwords, login, password);
@@ -113,9 +111,9 @@ int main(int argc, char *argv[]){
 	        } else{
 	            write(newsockfd, "There was no corresponding login and password", 45);
 	        }
-		isHostFound = false;
-		isLoginsFound = false;
-		isPasswordsFound = false;
+		hostFound = false;
+		loginsFound = false;
+		passwordsFound = false;
 		fillIncommingData->clear();
 		logins.clear();
 		passwords.clear();

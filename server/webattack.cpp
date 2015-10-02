@@ -104,7 +104,6 @@ static bool init(CURL *&conn, char *url, string& responceBuffer, char* errorBuff
 
     	return false;
 	}
-
   return true;
 }
 
