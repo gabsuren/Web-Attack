@@ -16,7 +16,7 @@ void error(const char *msg) {
 
 int main(int argc, char *argv[]) {
     int sockfd, newsockfd, portno, pid;
-    socklen_t clilen;
+    socklen_t client;
     struct sockaddr_in serv_addr = {0}, cli_addr;
 
     if (argc < 2) {
@@ -38,9 +38,9 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE; 
     }
     listen(sockfd, 5);
-    clilen = sizeof(cli_addr);
+    client = sizeof(cli_addr);
 
-    newsockfd = accept(sockfd,  (struct sockaddr *) &cli_addr, &clilen);
+    newsockfd = accept(sockfd,  (struct sockaddr *) &cli_addr, &client);
     if (newsockfd < 0) {
         error("ERROR on accept");
 		return EXIT_FAILURE; 
