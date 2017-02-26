@@ -3,7 +3,7 @@
 #include "mainwindow.h"
 #include "clientwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget* parent) :
     QWidget(parent) {
     hostLabel = new QLabel(tr("&Server name:"));
     portLabel = new QLabel(tr("S&erver port:"));
@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(enableGetFortuneButton()));
     connect(serverConnectionButton, SIGNAL(clicked()), this, SLOT(requestServerConnection()));
 
-    QGridLayout *mainLayout = new QGridLayout;
+    QGridLayout* mainLayout = new QGridLayout;
     mainLayout->addWidget(hostLabel, 0, 0);
     mainLayout->addWidget(hostLineEdit, 0, 1);
     mainLayout->addWidget(portLabel, 1, 0);
