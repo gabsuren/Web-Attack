@@ -10,7 +10,7 @@
 using namespace std;
 
 void dostuff(int, string*);
-void error(const char *msg) {
+static void error(const char* msg) {
     exit(1);
 }
 
